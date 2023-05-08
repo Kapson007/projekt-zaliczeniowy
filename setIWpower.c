@@ -8,17 +8,35 @@
 #include <linux/wireless.h>
 #include <sys/ioctl.h>
 
+// procedure to get ssid of IW card - pass socket, interface name, ssid, and wireless request
+void getSSID(int socketDescriptor, char* interfaceName, char* ssid, struct iwreq wireless_req){
+
+    strncpy(wireless_req.ifr_name, interfaceName, IFNAMSIZ);
+
+    if(ioctl(socketDescriptor, SIOCGIWESSID, &wireless_req) == -1){
+        perror("ioctl");
+        close(socketDescriptor);
+    }
+
+    strncpy(ssid, wireless_req.u.essid.pointer, sizeof(ssid));
+}
 
 
 int main(int argc, char** argv){
-    int descriptor;
+
     struct iwreq wireless_req;
+    int descriptor;
     char ssid[IW_ESSID_MAX_SIZE + 1];
-    memset(ssid, 0, sizeof(ssid));
+
+
     memset(&wireless_req, 0, sizeof(struct iwreq));
+    memset(ssid, 0, sizeof(ssid));
     wireless_req.u.essid.pointer = ssid;
     wireless_req.u.essid.length = IW_ESSID_MAX_SIZE;
-    iwreq.u.essid.flags = 0;
+    wireless_req.u.essid.flags = 0;
+
+    
+    memset(ssid, 0, sizeof(ssid));
 
     descriptor = socket(PF_INET, SOCK_DGRAM, 0);
     if(descriptor == -1){
@@ -26,20 +44,15 @@ int main(int argc, char** argv){
         return -1;
     }
 
-    strncpy(wireless_req.ifr_name, argv[1], IFNAMSIZ);
-    
+    // run function to get ssid of IW card through ioctl
+    getSSID(descriptor, argv[1], ssid ,wireless_req);
 
-    if(ioctl(descriptor, SIOCGIWESSID, &wireless_req) == -1){
-        perror("ioctl");
-        close(descriptor)
-        return -1;
-    }
-    strncpy(ssid, wireless_req.u.essid.pointer, sizeof(ssid));
-    printf("SSID: %s\n", ssid);
+    if(ssid != "\0")
+        printf("SSID: %s\n", ssid);
+    else
+        printf("SSID: Not found!\n");
 
     close(descriptor);
-    return EXIT_SUCCESS
-
-
+    return EXIT_SUCCESS;
 }
 
