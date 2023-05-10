@@ -132,7 +132,6 @@ void getIWPower(int socketDescriptor, char* powerDbm, struct iwreq wireless_req)
     
 
     if(ioctl(socketDescriptor, SIOCGIWTXPOW, &wireless_req) == -1){
-        printf("Blad");
         perror("ioctl");
         close(socketDescriptor);
     }
