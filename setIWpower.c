@@ -89,8 +89,9 @@ int main(int argc, char** argv){
 
     switch (userChoice){
         case 's':{
+            printf("Enter power: ");
             int power;
-                scanf("%d", &power);
+            scanf("%d", &power);
             if(checkAllowedPower(power)){
                 setIWPower(power, wireless_req);
                 getIWPower(powerDbm, wireless_req);
@@ -201,7 +202,7 @@ void adaptiveMode(char* power, struct iwreq wireless_req){
 }
 
 bool checkAllowedPower(int power){
-    if(power > IW_MAX_POWER_POLAND_DBM){
+    if(power < 0 || power > IW_MAX_POWER_POLAND_DBM){
         return false;
     }
     return true;
