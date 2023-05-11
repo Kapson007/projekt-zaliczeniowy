@@ -160,6 +160,8 @@ void setIWPower(int power, struct iwreq wireless_req){
         return;
     }
 
+    // TODO: to investigate this flags
+
     wireless_req.u.txpower.value = power;
     wireless_req.u.txpower.fixed = 1;
     wireless_req.u.txpower.disabled = 0;
