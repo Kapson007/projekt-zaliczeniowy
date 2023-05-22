@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2023 Kacper Nadstoga <kacper.nadstoga@student.put.poznan.pl>
+ *
+ * Compilation:  gcc setIWpower.c -o setIWpower
+ * Usage:        ./setIWpower <interface name>
+ *
+ */
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -160,11 +170,12 @@ void setIWPower(int power, struct iwreq wireless_req){
         return;
     }
 
-    // TODO: to investigate this flags
-
     wireless_req.u.txpower.value = power;
+    // fixed = 1 -> set power, hardware should not change it
     wireless_req.u.txpower.fixed = 1;
+    // disable - disable this feature
     wireless_req.u.txpower.disabled = 0;
+    // if any flag is needed this prop is obligatory - here we have to set unit for power - dBm
     wireless_req.u.txpower.flags = IW_TXPOW_DBM;
 
     if(ioctl(socketDescriptor, SIOCSIWTXPOW, &wireless_req) == -1){
@@ -182,10 +193,16 @@ void adaptiveMode(char* power, struct iwreq wireless_req){
         perror("socket");
         return;
     }
-
+    
     int userChoice = 0;
-    printf("Enter min value: ");
-    scanf("%d", &userChoice);
+    while(1){
+        printf("Enter min value: ");
+        scanf("%d", &userChoice);
+        if(checkAllowedPower(userChoice)){
+            break;
+        }
+    }
+    
 
     printf("Adaptive mode started.\n");
     printf("========================================\n");
@@ -195,7 +212,7 @@ void adaptiveMode(char* power, struct iwreq wireless_req){
         sleep(5);
         getIWPower(power, wireless_req);
 
-        if(atoi(power) < userChoice || atoi(power) == IW_MAX_POWER_POLAND_DBM -1 ){
+        if(atoi(power) < userChoice){
 
             printf("I have to power up.\n");
             setIWPower(atoi(power) + 1, wireless_req);
