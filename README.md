@@ -1,4 +1,4 @@
-# Dokumentacja projektu: Kontrola Mocy Karty IW
+# Kontrola Mocy Karty Bezprzewodowej
 
 ## Opis projektu
 Projekt Kontrola Mocy Karty Bezprzewodowej to program w języku C, który umożliwia zmianę mocy karty interfejsu sieciowego przy użyciu funkcji `ioctl`. Zapewnia prosty interfejs do regulacji poziomu mocy karty bezprzewodowej, co może być przydatne w sytuacjach, gdzie chcemy zoptymalizować wydajność sieci bezprzewodowej lub oszczędzać energię baterii.
