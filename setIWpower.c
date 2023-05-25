@@ -237,8 +237,19 @@ void adaptiveMode(char* power, struct iwreq wireless_req){
 
         if(signalLevel < userChoice){
 
+            if(atoi(power) == IW_MAX_POWER_POLAND_DBM){
+                printf("Maximum allowed Tx Power of your IW Card has been reached");
+                continue;
+            }
+
             printf("I have to power up.\n");
             setIWPower(atoi(power) + 1, wireless_req);
+
+        }else if(signalLevel > (userChoice + 5 ) && atoi(power) > 5){
+
+            printf("I have to power down.\n");
+            setIWPower(atoi(power) - 1, wireless_req);
+
         }
     }
     close(socketDescriptor);
