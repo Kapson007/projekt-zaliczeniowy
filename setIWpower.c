@@ -42,6 +42,9 @@ int createDescriptor();
 // get frequency of IW card
 void getIWFrequency(struct iwreq wireless_req);
 
+// get signal level of Access Point
+int getApSignalLevel(struct iwreq wireless_req);
+
 
 int main(int argc, char** argv){
 
@@ -75,11 +78,16 @@ int main(int argc, char** argv){
     getSSID(descriptor, ssid ,wireless_req);
 
     if(strlen(ssid) != 0){
+        printf("========================================\n\n");
+
         printf("SSID: %s\n", ssid);
 
-        // run function to get power and frequency of IW card through ioctl
+        // run function to get power, signal level of AP frequency of IW card through ioctl
         getIWPower(powerDbm,wireless_req);
         getIWFrequency(wireless_req);
+        int signalLevel = getApSignalLevel(wireless_req);
+        printf("Signal level of Access Point: %d[dBm]\n\n", signalLevel);
+        
     }else{
         printf("SSID: Not found!\n");
         close(descriptor);
@@ -119,6 +127,11 @@ int main(int argc, char** argv){
         case 'e':
         exit(1);
         break;
+
+        default:{
+            printf("Wrong choice!\n");
+            break;
+        }
     }
     printf("========================================\n");
     
@@ -134,6 +147,7 @@ void getSSID(int socketDescriptor, char* ssid, struct iwreq wireless_req){
     }
 
     strncpy(ssid, wireless_req.u.essid.pointer, sizeof(ssid));
+    return;
 }
 
 void getIWPower(char* powerDbm, struct iwreq wireless_req){
@@ -158,6 +172,8 @@ void getIWPower(char* powerDbm, struct iwreq wireless_req){
 
     strncpy(powerDbm, powerInStr, sizeof(powerDbm));
     printf("Power IW card: %s[dBm]\n", powerDbm);
+
+    close(socketDescriptor);
     return;
 }
 
@@ -182,27 +198,31 @@ void setIWPower(int power, struct iwreq wireless_req){
         perror("ioctl");
         close(socketDescriptor);
     }
+
+    close(socketDescriptor);
+    return;
 }
 
 
 void adaptiveMode(char* power, struct iwreq wireless_req){
 
     int socketDescriptor = createDescriptor();
+    int userChoice = 0;
+    int signalLevel = 0;
 
     if(socketDescriptor == -1){
         perror("socket");
         return;
     }
     
-    int userChoice = 0;
-    while(1){
-        printf("Enter min value: ");
+    do{
+
+        printf("Enter minimal signal level of Access Point: ");
         scanf("%d", &userChoice);
-        if(checkAllowedPower(userChoice)){
-            break;
-        }
-    }
+
+    }while(userChoice > 0);
     
+    printf("Level signal: %d[dBm]\n", userChoice);
 
     printf("Adaptive mode started.\n");
     printf("========================================\n");
@@ -211,13 +231,17 @@ void adaptiveMode(char* power, struct iwreq wireless_req){
         
         sleep(5);
         getIWPower(power, wireless_req);
+        signalLevel = getApSignalLevel(wireless_req);
 
-        if(atoi(power) < userChoice){
+        printf("Signal level of Access Point: %d[dBm]\n", signalLevel);
+
+        if(signalLevel < userChoice){
 
             printf("I have to power up.\n");
             setIWPower(atoi(power) + 1, wireless_req);
         }
     }
+    close(socketDescriptor);
 }
 
 bool checkAllowedPower(int power){
@@ -251,5 +275,30 @@ void getIWFrequency(struct iwreq wireless_req){
 
     // strncpy(powerDbm, powerInStr, sizeof(powerDbm));
     printf("Frequency IW card: %s[GHz]\n", powerInStr);
+
+    close(socketDescriptor);
     return;
+}
+
+int getApSignalLevel(struct iwreq wireless_req){
+    int socketDescriptor = createDescriptor();
+    if(socketDescriptor == -1){
+        perror("socket");
+        return -1;
+    }
+
+    if(ioctl(socketDescriptor, SIOCGIWSTATS, &wireless_req) == -1){
+        perror("ioctl");
+        close(socketDescriptor);
+        return -1;
+    }
+
+    // get pointer to data with physical parameters - it has to be casted to iw_statistics structure object
+    struct iw_statistics *stats = (struct iw_statistics *)wireless_req.u.data.pointer;
+
+    // get signal level but return as uint8_t
+    int singal_level = stats->qual.level - 256;
+
+    close(socketDescriptor);
+    return singal_level;
 }

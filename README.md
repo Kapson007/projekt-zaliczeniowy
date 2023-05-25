@@ -6,7 +6,7 @@ Projekt Kontrola Mocy Karty Bezprzewodowej to program w języku C, który umożl
 ## Funkcje
 Użytkownik ma do wyboru dwa tryby ustawiania mocy:
 - tryb ciągły - funkcja `setIWPower`, która ustawia na stałe odpowiedni poziom mocy w [dBm]
-- tryb adaptacyjny - funkcja `adaptiveMode` prosi użytkownika o pożądany minimalny poziom mocy na bieżąco co kilka sekund sprawdza aktualny poziom mocy interfejsu dostosowując ten parametr do wymagań użytkownika, jeżeli poziom mocy spadnie poniżej oczekiwanego progu.
+- tryb adaptacyjny - funkcja `adaptiveMode` prosi użytkownika o pożądany minimalny poziom mocy, a następnie co kilka sekund sprawdza aktualny poziom mocy punktu dostępu dostosowując moc karty do wymagań użytkownika, jeżeli poziom mocy spadnie poniżej oczekiwanego progu.
 Dodatkowo program wyposażony jest w funkcje `checkAllowedPower` sprawdzającą czy wartośc wprowadzona przez użytkownika jest legalna na terenie Rzeczypospolitej oraz funkcje `getSSID` i `getIWFrequency`, które zwracają następujące paramertry na podstawie nazwy interfejsu sieciowego:
 - nazwa(identyfikator) sieci - SSID,
 - aktualna częstotliwośc, na której bezprzewodowy interfejs pracuje.
